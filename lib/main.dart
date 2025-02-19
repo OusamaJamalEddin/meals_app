@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:google_fonts/google_fonts.dart";
-import 'package:meals_app/screens/meals_screen.dart';
+import 'package:meals_app/screens/categories_screen.dart';
 
 final kColorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
@@ -23,10 +23,9 @@ class MainApp extends StatelessWidget {
         appBarTheme: AppBarTheme().copyWith(
           backgroundColor: kColorScheme.onSecondary,
           foregroundColor: kColorScheme.onSurface,
-          titleTextStyle: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      home: MealsScreen(),
+      home: const CategoriesScreen(),
     );
   }
 }
