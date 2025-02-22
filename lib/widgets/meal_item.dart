@@ -1,25 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/models/meal.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class MealItem extends StatelessWidget {
-  const MealItem({super.key, required this.title});
+  const MealItem({super.key, required this.meal});
 
-  final String title;
+  final Meal meal;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.red,
-      ),
-      margin: EdgeInsets.all(8),
-      padding: EdgeInsets.all(8),
-      child: Text(
-        title,
-        style: Theme.of(context)
-            .textTheme
-            .bodySmall!
-            .copyWith(color: Theme.of(context).colorScheme.onSurface),
+    return Card(
+      child: InkWell(
+        child: Stack(
+          children: [
+            FadeInImage(
+              placeholder: MemoryImage(kTransparentImage),
+              image: NetworkImage(meal.imageUrl),
+            ),
+            Positioned(
+                bottom: 0,
+                right: 0,
+                left: 0,
+                child: Container(
+                  color: Colors.black54,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 44),
+                  child: Column(
+                    children: [
+                      Text(
+                        meal.title,
+                        maxLines: 2,
+                      ),
+                      const SizedBox(
+                        height: 6,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [],
+                      )
+                    ],
+                  ),
+                ))
+          ],
+        ),
       ),
     );
   }
