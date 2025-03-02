@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
 class MainDrawer extends StatelessWidget {
-  const MainDrawer({super.key, required this.onSelectDrawerItem});
+  const MainDrawer({
+    super.key,
+    required this.onSelectDrawerItem,
+  });
+
   final void Function(String identifier) onSelectDrawerItem;
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
