@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/models/meal.dart';
 import 'package:meals_app/screens/categories_screen.dart';
+import 'package:meals_app/screens/filters_screen.dart';
 import 'package:meals_app/screens/meals_screen.dart';
 import 'package:meals_app/widgets/main_drawer.dart';
+
+const kInitialFilters = {
+  Filter.glutenFree: false,
+  Filter.lactoseFree: false,
+  Filter.vegetarian: false,
+  Filter.vegan: false
+};
 
 class TabsScreen extends StatefulWidget {
   const TabsScreen({super.key});
@@ -12,6 +21,7 @@ class TabsScreen extends StatefulWidget {
 }
 
 class _TabsScreenState extends State<TabsScreen> {
+  Map<Filter, bool> _selectedFilters = kInitialFilters;
   final List<Meal> _favoriteMeals = [];
   int _selectedItemIndex = 0;
 
@@ -59,16 +69,57 @@ class _TabsScreenState extends State<TabsScreen> {
     });
   }
 
-  void _onSelectDrawerItem(String identifier) {
-    if (identifier == "meals") {
-      Navigator.pop(context);
-    } else {}
+//WE SHOULD RECEIVE THE FILTERS HERE
+  void _onSelectDrawerItem(String identifier) async {
+    /*identifier != filters, close drwaer when pressed.
+    ITS GOING TO BE CLOSED IN BOTH CONDITION
+    ( i dont want to close it manualy after coming back from the filter screen)
+    and i dont want to make a whole condition where if its not filters, then close it 
+    and this kinda work when only having 2 items, because if i have more, i need conditions for each one of them
+    here only meals identifier the one thats closing the screen, the rest( if there exist, wont be doing that surely)
+    */
+    Navigator.pop(context);
+    //identifier == filters, close drwaer then open screen
+    if (identifier == "filters") {
+      final result = await Navigator.of(context).push<Map<Filter, bool>>(
+        MaterialPageRoute(
+          builder: (context) => FiltersScreen(
+            //i am preserving the filters and passing them again to the filterscreen to the switches
+            currentFilters: _selectedFilters,
+          ),
+        ),
+      );
+      setState(() {
+        _selectedFilters = result ?? kInitialFilters;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    //filtered meals based on the checked filters
+    //if no filters applied, then return all meals
+    List<Meal> availableMeals = dummyMeals.where(
+      (meal) {
+        if (_selectedFilters[Filter.glutenFree]! && !meal.isGlutenFree) {
+          return false;
+        }
+        if (_selectedFilters[Filter.lactoseFree]! && !meal.isLactoseFree) {
+          return false;
+        }
+        if (_selectedFilters[Filter.vegetarian]! && !meal.isVegetarian) {
+          return false;
+        }
+        if (_selectedFilters[Filter.vegan]! && !meal.isVegan) {
+          return false;
+        }
+        return true;
+      },
+    ).toList();
+
     Widget activeScreen = CategoriesScreen(
       toggleFavoriteMeal: _toggleFavoriteMeal,
+      availableMeals: availableMeals,
     );
     String appBarTitle = "Food Categories";
 

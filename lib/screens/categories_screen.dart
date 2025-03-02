@@ -8,8 +8,10 @@ class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({
     super.key,
     required this.toggleFavoriteMeal,
+    required this.availableMeals,
   });
   final void Function(Meal meal) toggleFavoriteMeal;
+  final List<Meal> availableMeals;
 
   /*
   i can use function in stateless widget, to just change the screen, i am not 
@@ -25,7 +27,8 @@ class CategoriesScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MealsScreen(
-          meals: dummyMeals
+          //availableMeals replaced dummymeals (because its the filtered {gluten  ... etc})
+          meals: availableMeals
               .where((meal) => meal.categories.contains(categoryId))
               .toList(),
           title: categoryTitle,
