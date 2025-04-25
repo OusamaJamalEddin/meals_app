@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:meals_app/data/dummy_data.dart';
-import 'package:meals_app/models/meal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meals_app/provider/favorite_provider.dart';
 import 'package:meals_app/screens/categories_screen.dart';
 import 'package:meals_app/screens/filters_screen.dart';
 import 'package:meals_app/screens/meals_screen.dart';
 import 'package:meals_app/widgets/main_drawer.dart';
+import 'package:meals_app/provider/filters_provider.dart';
 
 const kInitialFilters = {
   Filter.glutenFree: false,
@@ -13,59 +14,20 @@ const kInitialFilters = {
   Filter.vegan: false
 };
 
-class TabsScreen extends StatefulWidget {
+//changed to Consumer Type to use riverpod
+class TabsScreen extends ConsumerStatefulWidget {
   const TabsScreen({super.key});
 
   @override
-  State<TabsScreen> createState() => _TabsScreenState();
+  ConsumerState<TabsScreen> createState() => _TabsScreenState();
 }
 
-class _TabsScreenState extends State<TabsScreen> {
-  Map<Filter, bool> _selectedFilters = kInitialFilters;
-  final List<Meal> _favoriteMeals = [];
+class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedItemIndex = 0;
 
   void _selectScreen(int index) {
     setState(() {
       _selectedItemIndex = index;
-    });
-  }
-
-  void _showInfoMessage(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Theme.of(context).colorScheme.onSecondary,
-        content: Text(
-          message,
-          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-          textAlign: TextAlign.center,
-        ),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
-/* we can either pass this function to meals_details_screen where we have the 
-  favorite button on, and that would require us to pass this function through 
-  multiple widget files, to check,. just accept this function in details screen
-  and u will see all the other files that would require this function in order to 
-  deliver it from the tabsScreen to the meals_details_screen.
-  but the linear apprach is better for less compelxity
-*/
-  void _toggleFavoriteMeal(Meal meal) {
-    bool isExisting = _favoriteMeals.contains(meal);
-    setState(() {
-      if (isExisting) {
-        _favoriteMeals.remove(meal);
-        _showInfoMessage("${meal.title} is no longer a favorite");
-      } else {
-        _favoriteMeals.add(meal);
-        _showInfoMessage("${meal.title} is Marked as a favorite");
-      }
     });
   }
 
@@ -81,52 +43,26 @@ class _TabsScreenState extends State<TabsScreen> {
     Navigator.pop(context);
     //identifier == filters, close drwaer then open screen
     if (identifier == "filters") {
-      final result = await Navigator.of(context).push<Map<Filter, bool>>(
+      await Navigator.of(context).push<Map<Filter, bool>>(
         MaterialPageRoute(
-          builder: (context) => FiltersScreen(
-            //i am preserving the filters and passing them again to the filterscreen to the switches
-            currentFilters: _selectedFilters,
-          ),
+          builder: (context) => const FiltersScreen(),
         ),
       );
-      setState(() {
-        _selectedFilters = result ?? kInitialFilters;
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    //filtered meals based on the checked filters
-    //if no filters applied, then return all meals
-    List<Meal> availableMeals = dummyMeals.where(
-      (meal) {
-        if (_selectedFilters[Filter.glutenFree]! && !meal.isGlutenFree) {
-          return false;
-        }
-        if (_selectedFilters[Filter.lactoseFree]! && !meal.isLactoseFree) {
-          return false;
-        }
-        if (_selectedFilters[Filter.vegetarian]! && !meal.isVegetarian) {
-          return false;
-        }
-        if (_selectedFilters[Filter.vegan]! && !meal.isVegan) {
-          return false;
-        }
-        return true;
-      },
-    ).toList();
-
+    final availableMeals = ref.watch(filteredMealsProvider);
     Widget activeScreen = CategoriesScreen(
-      toggleFavoriteMeal: _toggleFavoriteMeal,
       availableMeals: availableMeals,
     );
     String appBarTitle = "Food Categories";
 
     if (_selectedItemIndex == 1) {
+      final favoriteMeals = ref.watch(favoriteProvider);
       activeScreen = MealsScreen(
-        meals: _favoriteMeals,
-        toggleFavoriteMeal: _toggleFavoriteMeal,
+        meals: favoriteMeals,
       );
       appBarTitle = "Favorites";
     }
