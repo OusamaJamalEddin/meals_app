@@ -8,11 +8,9 @@ class MealItem extends StatelessWidget {
   const MealItem({
     super.key,
     required this.meal,
-    required this.toggleFavoriteMeal,
   });
 
   final Meal meal;
-  final void Function(Meal meal) toggleFavoriteMeal;
 
   String get complexityText {
     return meal.complexity.name[0].toUpperCase() +
@@ -33,7 +31,6 @@ class MealItem extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => MealsDetailsScreen(
           meal: meal,
-          toggleFavoriteMeal: toggleFavoriteMeal,
         ),
       ),
     );
@@ -52,12 +49,15 @@ class MealItem extends StatelessWidget {
         },
         child: Stack(
           children: [
-            FadeInImage(
-              placeholder: MemoryImage(kTransparentImage),
-              image: NetworkImage(meal.imageUrl),
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
+            Hero(
+              tag: meal.id,
+              child: FadeInImage(
+                placeholder: MemoryImage(kTransparentImage),
+                image: NetworkImage(meal.imageUrl),
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
             Positioned(
                 bottom: 0,
